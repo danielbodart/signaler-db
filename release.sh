@@ -5,6 +5,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 PATH=${DIR}/bin:${PATH}
 
 : ${SIGNALER_DB_URL?"Environment variable SIGNALER_DB_URL not set"}
+safe_url=`echo ${SIGNALER_DB_URL} | sed 's/.\+@/http:\/\//'`
 
 if [ -n "${BUILD_NUMBER}" ]; then
     export SIGNALER_VERSION=v${BUILD_NUMBER};
@@ -39,7 +40,9 @@ function upload_docs(){
 }
 
 function display_url(){
-   echo "${SIGNALER_DB_URL//:.+@/:******@}/signaler-db/_design/${SIGNALER_VERSION}/_list/features/all?user_group=${GROUP}&user_id=${USER_ID}" | sed 's/.\+@/http:\/\//'
+   echo "API: ${safe_url}/signaler-db/_design/${SIGNALER_VERSION}/_list/features/all?user_group=${GROUP}&user_id=${USER_ID}" 
+   echo "GUI: ${safe_url}/signaler-db/_design/${SIGNALER_VERSION}/_list/toggle/all" 
+
 }
 
 
