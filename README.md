@@ -3,7 +3,7 @@ A simple replacement for Bandiera using CouchDB and Typescript
 
 Features:
   * Application feature toggles are issolated (single CouchDB per application)
-  * Auto Versioned API with zero down time (a design documents per version)
+  * Auto Versioned API with zero down time (a design document per version)
   * Much faster performance (lower latency, high throughput)
   * Much simplier
   * Minimal dependencies (A CouchDB instance somewhere)
