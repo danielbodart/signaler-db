@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -e
+
+node_version=v6.9.2
+
+platform=`uname`
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
+install_dir="${DIR}/installs"
+
+if [ $platform = "Darwin" ]; then
+    node_release="node-${node_version}-darwin-x64.tar.gz"
+    node_compression=z
+else
+    node_release="node-${node_version}-linux-x64.tar.xz"
+    node_compression=J
+fi
+node_url="https://nodejs.org/dist/${node_version}/${node_release}"
+
+export NODE_HOME="${install_dir}/node-${node_version}"
+
+if [ ! -d "${NODE_HOME}" ]; then
+    mkdir -p "${NODE_HOME}"
+    echo "Installing node ${node_version}"
+    curl -sS -j -k -L "${node_url}" | tar -${node_compression}xC "${NODE_HOME}" --strip 1
+fi
+
+export PATH="${NODE_HOME}/bin:${PATH}"
+export NODE_PATH=${NODE_HOME}/lib/node_modules
+
+function install() {
+    local name=$1
+    local version=$2
+
+    if [[ $(package_version ${name}) != ${version} ]] &>> /dev/null ; then
+        echo "Installing ${name} ${version}"
+        rm -rf ${NODE_PATH}/${name}
+        npm install -g ${name}@${version} &>> /dev/null
+    fi
+}
+
+function package_version() {
+    local name=$1
+
+    node -p "require('${NODE_PATH}/${name}/package.json').version"
+}
+
+export -f install
+

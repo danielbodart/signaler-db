@@ -1,0 +1,7 @@
+*~
+.idea/workspace.xml
+.idea/copyright
+.idea/uiDesigner.xml
+.idea/shelf
+bin/installs
+**/app.js

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -e
+
+root=$(cd "$(dirname "$0")" > /dev/null && pwd)
+. ${root}/NODE_HOME
+
+install couchdb-push 2.3.1
+
+exec couchdb-push "$@"

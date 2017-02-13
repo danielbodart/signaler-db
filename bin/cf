@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -e
+
+platform=`uname`
+root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
+install_dir="${root}/installs"
+binary=${install_dir}/cf
+
+if [ $platform = "Darwin" ]; then
+    os="macosx64"
+else
+    os="linux64"
+fi
+
+url="https://cli.run.pivotal.io/stable?release=${os}-binary"
+
+if [ ! -f "${binary}" ]; then
+    mkdir -p "${install_dir}"
+    echo "Installing cf client ... (be patient)"
+    curl -sS -j -k -L "${url}" | tar -zxC "${install_dir}"
+fi
+
+exec ${binary} "$@"

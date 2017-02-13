@@ -1,0 +1,40 @@
+* {
+    box-sizing: border-box;
+    font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 400;
+}
+
+body {
+    margin: 14px;
+}
+
+td {
+    text-align: center;
+}
+
+th, tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+table, textarea, input[type=text] {
+    width: 100%;
+}
+
+caption {
+    background-color: #3498db;
+    color: white;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    font-size: 17px;
+    padding: 7px;
+}
+
+table {
+    border-left: 1px solid #3498db;
+    border-right: 1px solid #3498db;
+}
+
+form {
+    margin: 0;
+    padding: 0;
+}
