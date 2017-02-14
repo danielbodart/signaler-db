@@ -83,8 +83,8 @@ let design_doc: DesignDoc = {
 
                     send(`<tr><form action="../../_update/toggle/${feature._id}" method="post">
         <td class="active">
-            <input type="radio" name="active" value="true" ${ feature.active ? "checked" : "" }/>
-            <input type="radio" name="active" value="false" ${ feature.active ? "" : "checked" }/>
+            <label>On <input type="radio" name="active" value="true" ${ feature.active ? "checked" : "" }/> </label>
+            <label><input type="radio" name="active" value="false" ${ feature.active ? "" : "checked" }/> Off </label>
         </td>
         <td class="user_groups">
             <textarea name="user_groups">${feature.user_groups.join("\n")}</textarea>
