@@ -35,7 +35,7 @@ let design_doc: DesignDoc = {
             }
             if (action === 'Update' || action === 'Create') {
                 feature.active = req.form.active === 'true';
-                feature.user_groups = req.form.user_groups.split("\s+");
+                feature.user_groups = req.form.user_groups.split("\s+").filter(v => Boolean(v));
                 feature.percentage = parseInt(req.form.percentage);
                 feature.description = req.form.description;
                 return [feature, redirect];
