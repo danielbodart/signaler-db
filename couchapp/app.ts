@@ -35,9 +35,17 @@ let design_doc: DesignDoc = {
     },
     updates: {
         toggle: function (feature: Feature, req: Request): [CouchDoc, Response] {
-            function change(feature: Feature, property:string, new_value:any ): Change | null {
+            function change(feature: Feature, property:string, new_value:any ): Change {
                 let old_value = feature[property];
+                feature[property] = new_value;
                 return {property: property, old_value: old_value, new_value: new_value };
+            }
+
+            function equal(a:any, b:any){
+                if(a instanceof Array && b instanceof Array){
+                    return a.length==b.length && a.every((v,i)=> v === b[i]);
+                }
+                return a === b;
             }
 
             let action = req.form.action;
@@ -57,7 +65,7 @@ let design_doc: DesignDoc = {
                 changes.push(change(feature, "user_groups", req.form.user_groups.split("\s+").filter(v => Boolean(v))));
                 changes.push(change(feature, "percentage", parseInt(req.form.percentage)));
                 changes.push(change(feature, "description", req.form.description));
-                changes = changes.filter(c => c.old_value != c.new_value);
+                changes = changes.filter(c => !equal(c.old_value, c.new_value));
 
                 let history = feature.history || [];
                 history.push({
