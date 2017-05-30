@@ -1,5 +1,5 @@
 import {loadAttachments} from "couchapp";
-import {DesignDoc, CouchDoc} from "couch";
+import {DesignDoc, CouchDoc, UserContextObject, SecurityObject, Request, Response} from "couch";
 import {join} from "path";
 declare const __dirname: string;
 
@@ -9,6 +9,19 @@ interface Feature extends CouchDoc {
     active: boolean,
     percentage: number,
     user_groups: string[],
+    history?: History[],
+}
+
+interface History {
+    user?: string,
+    changes: Change[],
+    changed_at: Date,
+}
+
+interface Change{
+    property: string,
+    old_value: any,
+    new_value: any,
 }
 
 let design_doc: DesignDoc = {
@@ -21,9 +34,14 @@ let design_doc: DesignDoc = {
         }
     },
     updates: {
-        toggle: function (feature: Feature, req: any): [CouchDoc, {}] {
+        toggle: function (feature: Feature, req: Request): [CouchDoc, Response] {
+            function change(feature: Feature, property:string, new_value:any ): Change | null {
+                let old_value = feature[property];
+                return {property: property, old_value: old_value, new_value: new_value };
+            }
+
             let action = req.form.action;
-            let redirect = {
+            let redirect: Response = {
                 code: 303,
                 headers: {"Location": "../../_list/toggle/all"},
                 body: "Redirecting..."
@@ -34,10 +52,21 @@ let design_doc: DesignDoc = {
                 feature.name = req.form.name;
             }
             if (action === 'Update' || action === 'Create') {
-                feature.active = req.form.active === 'true';
-                feature.user_groups = req.form.user_groups.split("\s+").filter(v => Boolean(v));
-                feature.percentage = parseInt(req.form.percentage);
-                feature.description = req.form.description;
+                let changes:Change[] = [];
+                changes.push(change(feature, "active", req.form.active === 'true'));
+                changes.push(change(feature, "user_groups", req.form.user_groups.split("\s+").filter(v => Boolean(v))));
+                changes.push(change(feature, "percentage", parseInt(req.form.percentage)));
+                changes.push(change(feature, "description", req.form.description));
+                changes = changes.filter(c => c.old_value != c.new_value);
+
+                let history = feature.history || [];
+                history.push({
+                    user: req.userCtx.name,
+                    changes: changes,
+                    changed_at: new Date(),
+                });
+                feature.history = history;
+
                 return [feature, redirect];
             }
             else if (action === 'Delete') {
@@ -48,7 +77,7 @@ let design_doc: DesignDoc = {
         }
     },
     lists: {
-        toggle: function (head, req) {
+        toggle: function (head, req: Request) {
             provides('html', function () {
                 start({
                     "headers": {
