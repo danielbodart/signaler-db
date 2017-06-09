@@ -4,6 +4,6 @@ set -e
 root=$(cd "$(dirname "$0")" > /dev/null && pwd)
 . ${root}/NODE_HOME
 
-install typescript 2.0.3
+install typescript 2.3.4
 
 exec tsc "$@"
