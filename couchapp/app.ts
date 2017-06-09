@@ -18,7 +18,7 @@ interface History {
     changed_at: Date,
 }
 
-interface Change{
+interface Change {
     property: string,
     old_value: any,
     new_value: any,
@@ -35,15 +35,15 @@ let design_doc: DesignDoc = {
     },
     updates: {
         toggle (feature: Feature, req: Request): [CouchDoc, Response] {
-            function change(feature: Feature, property:string, new_value:any ): Change {
+            function change(feature: Feature, property: string, new_value: any): Change {
                 let old_value = feature[property];
                 feature[property] = new_value;
-                return {property: property, old_value: old_value, new_value: new_value };
+                return {property: property, old_value: old_value, new_value: new_value};
             }
 
-            function equal(a:any, b:any){
-                if(a instanceof Array && b instanceof Array){
-                    return a.length==b.length && a.every((v,i)=> v === b[i]);
+            function equal(a: any, b: any) {
+                if (a instanceof Array && b instanceof Array) {
+                    return a.length == b.length && a.every((v, i) => v === b[i]);
                 }
                 return a === b;
             }
@@ -60,7 +60,7 @@ let design_doc: DesignDoc = {
                 feature.name = req.form.name;
             }
             if (action === 'Update' || action === 'Create') {
-                let changes:Change[] = [];
+                let changes: Change[] = [];
                 changes.push(change(feature, "active", req.form.active === 'true'));
                 changes.push(change(feature, "user_groups", req.form.user_groups.split("\s+").filter(v => Boolean(v))));
                 changes.push(change(feature, "percentage", parseInt(req.form.percentage)));
@@ -85,7 +85,7 @@ let design_doc: DesignDoc = {
         }
     },
     lists: {
-        toggle: function (head, req: Request) {
+        toggle (head, req: Request) {
             provides('html', function () {
                 start({
                     "headers": {
@@ -170,7 +170,7 @@ let design_doc: DesignDoc = {
 </html>`);
             });
         },
-        features: function (head, req) {
+        features (head, req) {
             function isEnabled(feature: Feature, user_id: string, user_group: string) {
                 if (feature.active) {
                     if (feature.user_groups.length > 0) {
