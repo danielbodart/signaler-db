@@ -28,13 +28,13 @@ let design_doc: DesignDoc = {
     _id: '_design/' + process.env['SIGNALER_VERSION'],
     views: {
         all: {
-            map: function (feature: Feature) {
+            map(feature: Feature) {
                 emit(feature.name, feature);
             }
         }
     },
     updates: {
-        toggle: function (feature: Feature, req: Request): [CouchDoc, Response] {
+        toggle (feature: Feature, req: Request): [CouchDoc, Response] {
             function change(feature: Feature, property:string, new_value:any ): Change {
                 let old_value = feature[property];
                 feature[property] = new_value;
