@@ -1,6 +1,6 @@
-import {loadAttachments} from "couchapp";
-import {DesignDoc, CouchDoc, UserContextObject, SecurityObject, Request, Response} from "couch";
-import {join} from "path";
+import {loadAttachments} from "./lib/couchapp";
+import {DesignDoc, CouchDoc, UserContextObject, SecurityObject, Request, Response} from "./lib/couch";
+import {join} from "./lib/path";
 declare const __dirname: string;
 
 interface Feature extends CouchDoc {
