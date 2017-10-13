@@ -1,28 +1,9 @@
-import {loadAttachments} from "./lib/couchapp";
+import {loadAttachments} from "couchapp";
 import {DesignDoc, CouchDoc, UserContextObject, SecurityObject, Request, Response} from "./lib/couch";
-import {join} from "./lib/path";
+import {join} from "path";
+import {Change, Feature, History} from "./lib/signaler-db";
+
 declare const __dirname: string;
-
-interface Feature extends CouchDoc {
-    name: string,
-    description: string,
-    active: boolean,
-    percentage: number,
-    user_groups: string[],
-    history?: History[],
-}
-
-interface History {
-    user?: string,
-    changes: Change[],
-    changed_at: Date,
-}
-
-interface Change {
-    property: string,
-    old_value: any,
-    new_value: any,
-}
 
 let design_doc: DesignDoc = {
     _id: '_design/' + process.env['SIGNALER_VERSION'],
@@ -171,47 +152,6 @@ let design_doc: DesignDoc = {
             });
         },
         features (head, req) {
-            function isEnabled(feature: Feature, user_id: string, user_group: string) {
-                if (feature.active) {
-                    if (feature.user_groups.length > 0) {
-                        return feature.user_groups.indexOf(user_group) != -1;
-                    }
-                    if (feature.percentage) {
-                        return percentage_enabled_for_user(feature, user_id);
-                    }
-                    return true;
-                }
-                return false;
-            }
-
-            function makeCRCTable() {
-                let c;
-                let crcTable = [];
-                for (let n = 0; n < 256; n++) {
-                    c = n;
-                    for (let k = 0; k < 8; k++) {
-                        c = ((c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
-                    }
-                    crcTable[n] = c;
-                }
-                return crcTable;
-            }
-
-            function crc32(str) {
-                let crcTable = this.crcTable || (this.crcTable = makeCRCTable());
-                let crc = 0 ^ (-1);
-
-                for (let i = 0; i < str.length; i++) {
-                    crc = (crc >>> 8) ^ crcTable[(crc ^ str.charCodeAt(i)) & 0xFF];
-                }
-
-                return (crc ^ (-1)) >>> 0;
-            }
-
-            function percentage_enabled_for_user(doc, user_id) {
-                return crc32(doc.name + "-1_000_000-" + user_id) % 100 < doc.percentage
-            }
-
             provides('json', function () {
                 start({
                     "headers": {
@@ -221,6 +161,7 @@ let design_doc: DesignDoc = {
                 });
                 send('{"response":{');
                 let delimiter = false;
+                const isEnabled = require("is-enabled").isEnabled;
                 for (let row = getRow(); row != null; row = getRow()) {
                     if (delimiter) send(',');
                     send("\"" + row.key + "\"" + ':' + isEnabled(row.value, req.query.user_id, req.query.user_group));
@@ -232,6 +173,20 @@ let design_doc: DesignDoc = {
     }
 };
 
+function fileNameFromPath( path: string ): string {
+    return path.split( "/" ).pop();
+}
+
+function moduleToString( modulePathRelative: string ): string {
+    const fs = require( "fs" );
+    require( modulePathRelative );
+    const moduleName = fileNameFromPath( modulePathRelative ) + ".js";
+    const moduleRef = module.children.filter( child => fileNameFromPath( child.id ) === moduleName )[ 0 ];
+    return fs.readFileSync( moduleRef.filename ).toString();
+}
+
 loadAttachments(design_doc, join(__dirname, 'attachments'));
+
+design_doc[ "is-enabled" ] = moduleToString( "./lib/is-enabled" );
 
 export = design_doc;

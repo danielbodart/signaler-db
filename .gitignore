@@ -5,3 +5,7 @@
 .idea/shelf
 bin/installs
 **/app.js
+couchapp/node_modules
+node_modules
+.DS_Store
+.envrc
