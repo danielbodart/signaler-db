@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="TypeScriptCompiler">
+    <option name="isCompilerEnabled" value="true" />
+    <option name="typeScriptServiceDirectory" value="$PROJECT_DIR$/bin/installs/node-v6.9.2/lib/node_modules/typescript/lib" />
+    <option name="nodeInterpreterTextField" value="$PROJECT_DIR$/bin/node" />
+    <option name="mainFilePath" value="$PROJECT_DIR$/couchapp/tsconfig.json" />
+    <option name="useMainFile" value="true" />
+    <option name="useConfig" value="true" />
+    <option name="versionType" value="SERVICE_DIRECTORY" />
+  </component>
+</project>

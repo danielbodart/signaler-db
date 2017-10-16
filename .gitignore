@@ -4,4 +4,8 @@
 .idea/uiDesigner.xml
 .idea/shelf
 bin/installs
-**/app.js
+**/*.js
+couchapp/node_modules
+node_modules
+.DS_Store
+.envrc
