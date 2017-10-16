@@ -26,7 +26,8 @@ function update_db(){
         curl -X PUT ${url}
     fi
 
-    bin/tsc ${db}/app.ts
+    bin/npm install
+    bin/tsc -p ${db}
     bin/couchapp push ${db}/app.js ${url}
 }
 
