@@ -73,6 +73,6 @@ function string_to_be_hashed(part1: string, part2: string): string {
     return `${part1}-1_000_000-${part2}`;
 }
 
-function crc32_to_percentage(string_to_hash: string): number {
+export function crc32_to_percentage(string_to_hash: string): number {
     return crc32(string_to_hash) % 100;
 }

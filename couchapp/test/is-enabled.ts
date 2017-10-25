@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {describe, it} from "mocha";
-import {isEnabled, convertPercentagePropertyToOptions, option_to_show_user} from "../lib/is-enabled";
+import {isEnabled, convertPercentagePropertyToOptions, option_to_show_user, crc32_to_percentage} from "../lib/is-enabled";
 import {Feature} from "../lib/signaler-db";
 
 describe( "isEnabled function determines if a feature is enabled", function () {
@@ -171,6 +171,18 @@ describe( "the ratio of each option available for the feature should have the sa
         expect( option_to_show_user( 80, options ) ).to.equal( "five" );
         expect( option_to_show_user( 99, options ) ).to.equal( "five" );
 
+    });
+
+});
+
+describe( "super cautious tests based on actual values Tom pull from Signaler-db", function () {
+
+    it( "test", function () {
+        const options = [ true, false ];
+        const hashed_user_a = crc32_to_percentage("test-feature-1_000_000-0");
+        const hashed_user_b = crc32_to_percentage("test-feature-1_000_000-3");
+        expect( option_to_show_user( hashed_user_a, options) ).to.equal( true );
+        expect( option_to_show_user( hashed_user_b, options) ).to.equal( false );
     });
 
 });
