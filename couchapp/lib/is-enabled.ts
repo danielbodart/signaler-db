@@ -69,10 +69,6 @@ function crc32(str) {
     return (crc ^ (-1)) >>> 0;
 }
 
-function percentage_enabled_for_user(string_to_hash: string, percentage: number) {
-    return crc32(string_to_hash) % 100 < percentage
-}
-
 function string_to_be_hashed(part1: string, part2: string): string {
     return `${part1}-1_000_000-${part2}`;
 }
