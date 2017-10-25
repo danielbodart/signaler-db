@@ -7,12 +7,43 @@ export function isEnabled(feature: Feature, user_id: string, user_group: string)
         if (feature.user_groups.length > 0) {
             return feature.user_groups.indexOf(user_group) != -1;
         }
-        if (feature.percentage) {
-            return percentage_enabled_for_user(feature, user_id);
-        }
-        return true;
+
+        return option_to_show_user(
+            crc32_to_percentage( string_to_be_hashed(feature.name, user_id) ),
+            getOptions( feature )
+        );
     }
     return false;
+}
+
+function getOptions( feature: Feature ): Array<any> {
+
+    if ( feature.options ) {
+        return feature.options;
+    }
+
+    if ( feature.percentage ) {
+        return convertPercentagePropertyToOptions(feature.percentage);
+    }
+
+    return [ true ];
+
+}
+
+export function option_to_show_user( percentage: number, options: Array<any> ): any {
+
+    return options[ Math.floor( percentage / ( 100 / options.length ) ) ];
+
+}
+
+export function convertPercentagePropertyToOptions(percentage: number ) {
+    if ( percentage === 0 ) {
+        return [ false ];
+    }
+    if ( percentage === 100 ) {
+        return [ true ];
+    }
+    return [ true, false ];
 }
 
 function makeCRCTable() {
@@ -38,6 +69,14 @@ function crc32(str) {
     return (crc ^ (-1)) >>> 0;
 }
 
-function percentage_enabled_for_user(doc, user_id) {
-    return crc32(doc.name + "-1_000_000-" + user_id) % 100 < doc.percentage
+function percentage_enabled_for_user(string_to_hash: string, percentage: number) {
+    return crc32(string_to_hash) % 100 < percentage
+}
+
+function string_to_be_hashed(part1: string, part2: string): string {
+    return `${part1}-1_000_000-${part2}`;
+}
+
+function crc32_to_percentage(string_to_hash: string): number {
+    return crc32(string_to_hash) % 100;
 }

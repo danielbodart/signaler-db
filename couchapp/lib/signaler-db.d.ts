@@ -10,9 +10,10 @@ export interface Feature extends CouchDoc {
     name: string,
     description: string,
     active: boolean,
-    percentage: number,
+    percentage?: number,
     user_groups: string[],
     history?: History[],
+    options?: Array<any>
 }
 
 export interface History {
