@@ -121,8 +121,10 @@ describe( "the ratio of each option available for the feature should have the sa
 
         const options = [ "one", "two" ];
 
-        expect( option_to_show_user( 33, options ) ).to.equal( "one" );
-        expect( option_to_show_user( 66, options ) ).to.equal( "two" );
+        expect( option_to_show_user( 0, options ) ).to.equal( "one" );
+        expect( option_to_show_user( 49, options ) ).to.equal( "one" );
+        expect( option_to_show_user( 50, options ) ).to.equal( "two" );
+        expect( option_to_show_user( 99, options ) ).to.equal( "two" );
 
     });
 
@@ -130,9 +132,12 @@ describe( "the ratio of each option available for the feature should have the sa
 
         const options = [ "one", "two", "three" ];
 
-        expect( option_to_show_user( 25, options ) ).to.equal( "one" );
-        expect( option_to_show_user( 50, options ) ).to.equal( "two" );
-        expect( option_to_show_user( 75, options ) ).to.equal( "three" );
+        expect( option_to_show_user( 0, options ) ).to.equal( "one" );
+        expect( option_to_show_user( 33, options ) ).to.equal( "one" );
+        expect( option_to_show_user( 34, options ) ).to.equal( "two" );
+        expect( option_to_show_user( 66, options ) ).to.equal( "two" );
+        expect( option_to_show_user( 67, options ) ).to.equal( "three" );
+        expect( option_to_show_user( 99, options ) ).to.equal( "three" );
 
     });
 
@@ -140,10 +145,14 @@ describe( "the ratio of each option available for the feature should have the sa
 
         const options = [ "one", "two", "three", "four" ];
 
-        expect( option_to_show_user( 15, options ) ).to.equal( "one" );
-        expect( option_to_show_user( 35, options ) ).to.equal( "two" );
-        expect( option_to_show_user( 65, options ) ).to.equal( "three" );
-        expect( option_to_show_user( 85, options ) ).to.equal( "four" );
+        expect( option_to_show_user( 0, options ) ).to.equal( "one" );
+        expect( option_to_show_user( 24, options ) ).to.equal( "one" );
+        expect( option_to_show_user( 25, options ) ).to.equal( "two" );
+        expect( option_to_show_user( 49, options ) ).to.equal( "two" );
+        expect( option_to_show_user( 50, options ) ).to.equal( "three" );
+        expect( option_to_show_user( 74, options ) ).to.equal( "three" );
+        expect( option_to_show_user( 75, options ) ).to.equal( "four" );
+        expect( option_to_show_user( 99, options ) ).to.equal( "four" );
 
     });
 
@@ -151,11 +160,16 @@ describe( "the ratio of each option available for the feature should have the sa
 
         const options = [ "one", "two", "three", "four", "five" ];
 
-        expect( option_to_show_user( 10, options ) ).to.equal( "one" );
-        expect( option_to_show_user( 30, options ) ).to.equal( "two" );
-        expect( option_to_show_user( 50, options ) ).to.equal( "three" );
+        expect( option_to_show_user( 0, options ) ).to.equal( "one" );
+        expect( option_to_show_user( 19, options ) ).to.equal( "one" );
+        expect( option_to_show_user( 20, options ) ).to.equal( "two" );
+        expect( option_to_show_user( 39, options ) ).to.equal( "two" );
+        expect( option_to_show_user( 40, options ) ).to.equal( "three" );
+        expect( option_to_show_user( 59, options ) ).to.equal( "three" );
         expect( option_to_show_user( 60, options ) ).to.equal( "four" );
-        expect( option_to_show_user( 90, options ) ).to.equal( "five" );
+        expect( option_to_show_user( 79, options ) ).to.equal( "four" );
+        expect( option_to_show_user( 80, options ) ).to.equal( "five" );
+        expect( option_to_show_user( 99, options ) ).to.equal( "five" );
 
     });
 
