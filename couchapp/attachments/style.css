@@ -1,19 +1,59 @@
+@import url('https://fonts.googleapis.com/css?family=Rubik:300,400,400i,500&amp;subset=cyrillic,hebrew,latin-ext');
+
+/*
+
+$light-gray: #f9faf8;
+$gray: #f1f2eb;
+$dark-gray: #3e4e50;
+$accent: #ffd151;
+$blue: #2274a5;
+$red: #f06449;
+
+ */
+
 * {
     box-sizing: border-box;
-    font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: 'Rubik', sans-serif;
     font-weight: 400;
+    color: #3e4e50;
 }
 
 body {
     margin: 14px;
 }
 
+th {
+    font-weight: 500;
+    padding: 10px;
+}
+
 td {
     text-align: center;
 }
 
+td.name{
+    white-space: nowrap;
+}
+
+td.name, td.description {
+    text-align: left;
+}
+
 th, tr:nth-child(even) {
-    background: #f9f9f9;
+    background: #f9faf8;
+}
+
+:target {
+    animation: target-fade 2s 1;
+}
+
+@keyframes target-fade {
+    0% { background-color: #880000; }
+    100% { background-color: inherit; }
+}
+
+tr:hover {
+    background-color: #f1f2eb;
 }
 
 table, textarea, input[type=text] {
@@ -25,8 +65,9 @@ caption {
     color: white;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
-    font-size: 17px;
     padding: 7px;
+    font-size: 2.5rem;
+    font-weight: 500;
 }
 
 table {
@@ -37,4 +78,54 @@ table {
 form {
     margin: 0;
     padding: 0;
+}
+
+.button {
+    display: inline-block;
+    border: #2274a5 2px solid;
+    padding: 10px 25px;
+    font-weight: normal;
+    line-height: 1.5;
+    border-radius: 25px;
+    background-color: #fff;
+    color: #2274a5;
+    text-decoration: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    font-size: 1em
+}
+
+.button:focus,.button:hover,.button:active {
+    cursor: pointer;
+    background-color: #2274a5;
+    color: #fff
+}
+
+.button:link,.button:visited {
+    text-decoration: none
+}
+
+
+input[type=text], input[type=email], input[type=number], textarea {
+    border: 1px solid #eee;
+    color: inherit;
+    height: 48px;
+    padding: 0 20px;
+    min-width: 240px;
+    font-size: 1rem
+}
+
+textarea {
+    padding: 20px;
+}
+
+input[type=text]:hover, input[type=text]:focus, input[type=email]:hover, input[type=email]:focus, input[type=number]:hover, input[type=number]:focus, textarea:hover, textarea:focus {
+    border-color: #2274a5
+}
+
+input[type=text]:focus, input[type=email]:focus, textarea:focus, input[type=number]:hover, input[type=number]:focus {
+    outline: 0 none;
+    box-shadow: 0 0 3px #2b92cf
 }

@@ -15,7 +15,7 @@ let design_doc: DesignDoc = {
         }
     },
     updates: {
-        toggle (feature: Feature, req: Request): [CouchDoc, Response] {
+        toggle(feature: Feature, req: Request): [CouchDoc, Response] {
             function change(feature: Feature, property: string, new_value: any): Change {
                 let old_value = feature[property];
                 feature[property] = new_value;
@@ -30,22 +30,23 @@ let design_doc: DesignDoc = {
             }
 
             let action = req.form.action;
-            let redirect: Response = {
-                code: 303,
-                headers: {"Location": "../../_list/toggle/all"},
-                body: "Redirecting..."
-            };
             if (action === 'Create') {
                 feature = {} as Feature;
                 feature._id = req.form.name;
                 feature.name = req.form.name;
             }
+            let redirect: Response = {
+                code: 303,
+                headers: {"Location": "../../_list/toggle/all#" + feature._id},
+                body: "Redirecting..."
+            };
             if (action === 'Update' || action === 'Create') {
                 let changes: Change[] = [];
                 changes.push(change(feature, "active", req.form.active === 'true'));
                 changes.push(change(feature, "user_groups", req.form.user_groups.split("\s+").filter(v => Boolean(v))));
                 changes.push(change(feature, "percentage", parseInt(req.form.percentage)));
                 changes.push(change(feature, "description", req.form.description));
+                // changes.push(change(feature, "options", req.form.options));
                 changes = changes.filter(c => !equal(c.old_value, c.new_value));
 
                 let history = feature.history || [];
@@ -66,7 +67,7 @@ let design_doc: DesignDoc = {
         }
     },
     lists: {
-        toggle (head, req: Request) {
+        toggle(head, req: Request) {
             provides('html', function () {
                 start({
                     "headers": {
@@ -86,9 +87,9 @@ let design_doc: DesignDoc = {
     <caption>Features</caption>
     <thead>
     <tr>
-        <th class="active">Active?</th>
-        <th class="user_groups">User Groups?</th>
-        <th class="percentage">User%</th>
+        <th class="active">Active</th>
+        <th class="user_groups">User Groups</th>
+        <th class="percentage">Percentage</th>
         <th class="name">Name</th>
         <th class="description">Description</th>
         <th class="actions">Actions</th>
@@ -99,28 +100,26 @@ let design_doc: DesignDoc = {
                     let feature: Feature = row.value;
 
 
-                    send(`<tr><form action="../../_update/toggle/${feature._id}" method="post">
+                    send(`<tr id="${feature._id}">
         <td class="active">
-            <label>On <input type="radio" name="active" value="true" ${ feature.active ? "checked" : "" }/> </label>
-            <label><input type="radio" name="active" value="false" ${ feature.active ? "" : "checked" }/> Off </label>
+            ${ feature.active ? "On" : "Off" }
         </td>
         <td class="user_groups">
-            <textarea name="user_groups">${feature.user_groups.join("\n")}</textarea>
+            ${feature.user_groups.join("<br>")}
         </td>
         <td class="percentage">
-            <input type="number" name="percentage" value="${feature.percentage}"/>
+            ${feature.percentage ? feature.percentage : ""}
         </td>
         <td class="name">
-            <input type="text" name="name" value="${feature.name}" readonly/>
+            ${feature.name}
         </td>
         <td class="description">
-            <textarea name="description">${feature.description}</textarea>
+            ${feature.description}
         </td>
         <td class="actions">
-            <input class="primary-button" type="submit" name="action" value="Update"/>
-            <input class="primary-button"  type="submit" name="action" value="Delete"/>
+            <a class="button" href="../../_show/edit/${feature._id}">Edit</a>
         </td>
-    </form></tr>`);
+    </tr>`);
                 }
                 send(`</tbody>
     <tfoot>
@@ -142,7 +141,7 @@ let design_doc: DesignDoc = {
             <input type="text" name="description" value=""/>
         </td>
         <td>
-            <input type="submit" name="action" value="Create"/>
+            <input class="button" type="submit" name="action" value="Create"/>
         </td>
     </form></tr>
     </tfoot>
@@ -151,7 +150,7 @@ let design_doc: DesignDoc = {
 </html>`);
             });
         },
-        features (head, req) {
+        features(head, req) {
             provides('json', function () {
                 start({
                     "headers": {
@@ -169,6 +168,65 @@ let design_doc: DesignDoc = {
                 }
                 send('}}');
             });
+        }
+    },
+    shows: {
+        edit(feature: Feature, req: Request): string {
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Signaler-DB</title>
+    <link rel="stylesheet" href="../../style.css"/>
+</head>
+<body>
+<table>
+    <caption>Feature</caption>
+    <tbody>
+    <form action="../../_update/toggle/${feature._id}" method="post">
+    <tr>
+        <th class="name">Name</th>
+        <td class="name">
+            <input type="text" name="name" value="${feature.name}" readonly/>
+        </td>
+    </tr>
+    <tr>
+        <th class="description">Description</th>
+        <td class="description">
+            <textarea name="description">${feature.description}</textarea>
+        </td>
+    </tr>
+    <tr>
+        <th class="active">Active</th>
+                <td class="active">
+            <label>On <input type="radio" name="active" value="true" ${ feature.active ? "checked" : "" }/> </label>
+            <label><input type="radio" name="active" value="false" ${ feature.active ? "" : "checked" }/> Off </label>
+        </td>
+    </tr>
+    <tr>
+        <th class="user_groups">User Groups</th>
+        <td class="user_groups">
+            <textarea name="user_groups">${feature.user_groups.join("\\n")}</textarea>
+        </td>
+    </tr>
+    <tr>
+        <th class="percentage">Percentage</th>
+        <td class="percentage">
+            <input type="number" name="percentage" value="${feature.percentage}"/>
+        </td>
+    </tr>
+    <tr>
+        <th class="actions">Actions</th>
+        <td class="actions">
+            <input class="button" type="submit" name="action" value="Update"/>
+            <input class="button"  type="submit" name="action" value="Delete"/>
+        </td>
+    </tr>
+    </form>
+    </tbody>
+</table>
+</body>
+</html>`
         }
     }
 };
