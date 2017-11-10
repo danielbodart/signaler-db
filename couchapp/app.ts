@@ -24,9 +24,14 @@ let design_doc: DesignDoc = {
 
             function equal(a: any, b: any) {
                 if (a instanceof Array && b instanceof Array) {
-                    return a.length == b.length && a.every((v, i) => v === b[i]);
+                    // stupid simple
+                    return a.length == b.length;
                 }
                 return a === b;
+            }
+
+            function toArray(value:string):any[]{
+                return value.split("\s+").filter(v => Boolean(v));
             }
 
             let action = req.form.action;
@@ -43,10 +48,9 @@ let design_doc: DesignDoc = {
             if (action === 'Update' || action === 'Create') {
                 let changes: Change[] = [];
                 changes.push(change(feature, "active", req.form.active === 'true'));
-                changes.push(change(feature, "user_groups", req.form.user_groups.split("\s+").filter(v => Boolean(v))));
-                changes.push(change(feature, "percentage", parseInt(req.form.percentage)));
+                changes.push(change(feature, "user_groups", toArray(req.form.user_groups)));
                 changes.push(change(feature, "description", req.form.description));
-                // changes.push(change(feature, "options", req.form.options));
+                changes.push(change(feature, "options", JSON.parse(req.form.options)));
                 changes = changes.filter(c => !equal(c.old_value, c.new_value));
 
                 let history = feature.history || [];
@@ -69,6 +73,7 @@ let design_doc: DesignDoc = {
     lists: {
         toggle(head, req: Request) {
             provides('html', function () {
+                const convertPercentagePropertyToOptions = require("is-enabled").convertPercentagePropertyToOptions;
                 start({
                     "headers": {
                         "Cache-Control": "public, max-age=60",
@@ -84,15 +89,14 @@ let design_doc: DesignDoc = {
 </head>
 <body>
 <table>
-    <caption>Features</caption>
+    <caption>Features <a class="button" href="../../_show/edit/">New</a></caption>
     <thead>
     <tr>
         <th class="active">Active</th>
         <th class="user_groups">User Groups</th>
-        <th class="percentage">Percentage</th>
+        <th class="options">Options</th>
         <th class="name">Name</th>
         <th class="description">Description</th>
-        <th class="actions">Actions</th>
     </tr>
     </thead>
     <tbody>`);
@@ -102,49 +106,23 @@ let design_doc: DesignDoc = {
 
                     send(`<tr id="${feature._id}">
         <td class="active">
-            ${ feature.active ? "On" : "Off" }
+            <a href="../../_show/edit/${feature._id}">${ feature.active ? "On" : "Off" }</a>
         </td>
         <td class="user_groups">
-            ${feature.user_groups.join("<br>")}
+            <a href="../../_show/edit/${feature._id}">${feature.user_groups.join("<br>")}</a>
         </td>
-        <td class="percentage">
-            ${feature.percentage ? feature.percentage : ""}
+        <td class="options">
+            <a href="../../_show/edit/${feature._id}">${JSON.stringify(feature.options ? feature.options : convertPercentagePropertyToOptions(feature.percentage))}</a>
         </td>
         <td class="name">
-            ${feature.name}
+            <a href="../../_show/edit/${feature._id}">${feature.name}</a>
         </td>
         <td class="description">
-            ${feature.description}
-        </td>
-        <td class="actions">
-            <a class="button" href="../../_show/edit/${feature._id}">Edit</a>
+            <a href="../../_show/edit/${feature._id}">${feature.description}</a>
         </td>
     </tr>`);
                 }
                 send(`</tbody>
-    <tfoot>
-    <tr><form action="../../_update/toggle/" method="post">
-        <td>
-            <input type="radio" name="active" value="true"/>
-            <input type="radio" name="active" value="false" checked/>
-        </td>
-        <td>
-            <textarea name="user_groups"></textarea>
-        </td>
-        <td>
-            <input type="number" name="percentage" value=""/>
-        </td>
-        <td>
-            <input type="text" name="name" required/>
-        </td>
-        <td>
-            <input type="text" name="description" value=""/>
-        </td>
-        <td>
-            <input class="button" type="submit" name="action" value="Create"/>
-        </td>
-    </form></tr>
-    </tfoot>
 </table>
 </body>
 </html>`);
@@ -161,10 +139,15 @@ let design_doc: DesignDoc = {
                 send('{"response":{');
                 let delimiter = false;
                 const isEnabled = require("is-enabled").isEnabled;
+                const chooseOption = require("is-enabled").chooseOption;
+
                 for (let row = getRow(); row != null; row = getRow()) {
-                    if (delimiter) send(',');
-                    send("\"" + row.key + "\"" + ':' + isEnabled(row.value, req.query.user_id, req.query.user_group));
-                    delimiter = true;
+                    let feature = row.value as Feature;
+                    if(isEnabled(feature, req.query.user_group)) {
+                        if (delimiter) send(',');
+                        send("\"" + row.key + "\"" + ':' + JSON.stringify(chooseOption(feature, req.query.user_id)));
+                        delimiter = true;
+                    }
                 }
                 send('}}');
             });
@@ -172,6 +155,19 @@ let design_doc: DesignDoc = {
     },
     shows: {
         edit(feature: Feature, req: Request): string {
+            if (feature == null) {
+                feature = {} as Feature;
+                feature._id = "";
+                feature.name = "";
+                feature.description = "";
+                feature.user_groups = [];
+            }
+            const convertPercentagePropertyToOptions = require("is-enabled").convertPercentagePropertyToOptions;
+
+            function toList(values: any[]): string {
+                return values.join("\n");
+            }
+
             return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -187,7 +183,7 @@ let design_doc: DesignDoc = {
     <tr>
         <th class="name">Name</th>
         <td class="name">
-            <input type="text" name="name" value="${feature.name}" readonly/>
+            <input type="text" name="name" value="${feature.name}" ${feature.name == "" ? "" : "readonly"}/>
         </td>
     </tr>
     <tr>
@@ -206,19 +202,19 @@ let design_doc: DesignDoc = {
     <tr>
         <th class="user_groups">User Groups</th>
         <td class="user_groups">
-            <textarea name="user_groups">${feature.user_groups.join("\\n")}</textarea>
+            <textarea name="user_groups">${toList(feature.user_groups)}</textarea>
         </td>
     </tr>
     <tr>
-        <th class="percentage">Percentage</th>
-        <td class="percentage">
-            <input type="number" name="percentage" value="${feature.percentage}"/>
+        <th class="options">Options</th>
+        <td class="options">
+            <textarea name="options">${JSON.stringify(feature.options ? feature.options : convertPercentagePropertyToOptions(feature.percentage))}</textarea>
         </td>
     </tr>
     <tr>
         <th class="actions">Actions</th>
         <td class="actions">
-            <input class="button" type="submit" name="action" value="Update"/>
+            <input class="button" type="submit" name="action" value="${feature.name == "" ? "Create" : "Update"}"/>
             <input class="button"  type="submit" name="action" value="Delete"/>
         </td>
     </tr>
@@ -231,20 +227,20 @@ let design_doc: DesignDoc = {
     }
 };
 
-function fileNameFromPath( path: string ): string {
-    return path.split( "/" ).pop();
+function fileNameFromPath(path: string): string {
+    return path.split("/").pop();
 }
 
-function moduleToString( modulePathRelative: string ): string {
-    const fs = require( "fs" );
-    require( modulePathRelative );
-    const moduleName = fileNameFromPath( modulePathRelative ) + ".js";
-    const moduleRef = module.children.filter( child => fileNameFromPath( child.id ) === moduleName )[ 0 ];
-    return fs.readFileSync( moduleRef.filename ).toString();
+function moduleToString(modulePathRelative: string): string {
+    const fs = require("fs");
+    require(modulePathRelative);
+    const moduleName = fileNameFromPath(modulePathRelative) + ".js";
+    const moduleRef = module.children.filter(child => fileNameFromPath(child.id) === moduleName)[0];
+    return fs.readFileSync(moduleRef.filename).toString();
 }
 
 loadAttachments(design_doc, join(__dirname, 'attachments'));
 
-design_doc[ "is-enabled" ] = moduleToString( "./lib/is-enabled" );
+design_doc["is-enabled"] = moduleToString("./lib/is-enabled");
 
 export = design_doc;

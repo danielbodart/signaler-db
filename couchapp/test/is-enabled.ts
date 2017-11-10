@@ -1,6 +1,9 @@
 import {expect} from "chai";
 import {describe, it} from "mocha";
-import {isEnabled, convertPercentagePropertyToOptions, option_to_show_user, crc32_to_percentage} from "../lib/is-enabled";
+import {
+    isEnabled, convertPercentagePropertyToOptions, option_to_show_user, crc32_to_percentage,
+    chooseOption
+} from "../lib/is-enabled";
 import {Feature} from "../lib/signaler-db";
 
 describe( "isEnabled function determines if a feature is enabled", function () {
@@ -11,10 +14,9 @@ describe( "isEnabled function determines if a feature is enabled", function () {
             "name": "deactivate",
             "active": false
         };
-        const userId = "1";
         const userGroup = null;
 
-        expect( isEnabled( inactiveFeature as Feature, userId, userGroup ) ).to.equal( false );
+        expect( isEnabled( inactiveFeature as Feature, userGroup ) ).to.equal( false );
 
     });
 
@@ -25,27 +27,12 @@ describe( "isEnabled function determines if a feature is enabled", function () {
             "active": true,
             "user_groups": [ "2041-1723", "2055-1010" ]
         };
-        const userId = "1";
         const userGroup = "2041-1723";
 
-        expect( isEnabled( userGroupFeature as Feature, userId, userGroup ) ).to.equal( true );
+        expect( isEnabled( userGroupFeature as Feature, userGroup ) ).to.equal( true );
 
     });
 
-    it( "should be FALSE if a feature is enabled, the user is in the CONTROL group and the feature uses the old percentage property", function () {
-
-        const percentageFeature = {
-            "name": "percentage",
-            "active": true,
-            "user_groups": [],
-            "percentage": 50
-        };
-        const userId = "1";
-        const userGroup = null;
-
-        expect( isEnabled( percentageFeature as Feature, userId, userGroup ) ).to.equal( false );
-
-    });
 
     it( "should be TRUE if a feature is enabled and the user is in the TEST group and the feature uses the old percentage property", function () {
 
@@ -58,22 +45,7 @@ describe( "isEnabled function determines if a feature is enabled", function () {
         const userId = "0";
         const userGroup = null;
 
-        expect( isEnabled( percentageFeature as Feature, userId, userGroup ) ).to.equal( true );
-
-    });
-
-    it( "should be FALSE if a feature is enabled, the user is in the CONTROL group and the feature uses the new options property", function () {
-
-        const percentageFeature = {
-            "name": "percentage",
-            "active": true,
-            "user_groups": [],
-            "options": [ true, false ]
-        };
-        const userId = "1";
-        const userGroup = null;
-
-        expect( isEnabled( percentageFeature as Feature, userId, userGroup ) ).to.equal( false );
+        expect( isEnabled( percentageFeature as Feature, userGroup ) ).to.equal( true );
 
     });
 
@@ -88,11 +60,35 @@ describe( "isEnabled function determines if a feature is enabled", function () {
         const userId = "0";
         const userGroup = null;
 
-        expect( isEnabled( percentageFeature as Feature, userId, userGroup ) ).to.equal( true );
+        expect( isEnabled( percentageFeature as Feature, userGroup ) ).to.equal( true );
 
     });
 
 });
+
+describe( "chooseOption function", function () {
+
+    it("falls back to percentages if options not set", function () {
+        const feature = {
+            "name": "percentage",
+            "percentage": 50
+        };
+        expect(chooseOption(feature as Feature, "3")).to.equal(true);
+        expect(chooseOption(feature as Feature, "1")).to.equal(false);
+    });
+
+    it("will choose from options otherwise", function () {
+        const feature = {
+            "name": "percentage",
+            "options": ["cat", "dog", "mouse"]
+        };
+        expect(chooseOption(feature as Feature, "3")).to.equal("cat");
+        expect(chooseOption(feature as Feature, "2")).to.equal("dog");
+        expect(chooseOption(feature as Feature, "1")).to.equal("mouse");
+    });
+
+});
+
 
 describe( "Old property 'percentage' should be converted to new property 'options'", function () {
 

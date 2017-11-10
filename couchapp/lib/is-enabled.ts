@@ -2,22 +2,17 @@ import {Feature} from "./signaler-db";
 
 const crcTable = makeCRCTable();
 
-export function isEnabled(feature: Feature, user_id: string, user_group: string) {
+export function isEnabled(feature: Feature, user_group: string) {
     if (feature.active) {
         if (feature.user_groups.length > 0) {
             return feature.user_groups.indexOf(user_group) != -1;
         }
-
-        return option_to_show_user(
-            crc32_to_percentage( string_to_be_hashed(feature.name, user_id) ),
-            getOptions( feature )
-        );
+        return true;
     }
     return false;
 }
 
 function getOptions( feature: Feature ): Array<any> {
-
     if ( feature.options ) {
         return feature.options;
     }
@@ -27,11 +22,16 @@ function getOptions( feature: Feature ): Array<any> {
     }
 
     return [ true ];
-
 }
 
-export function option_to_show_user( percentage: number, options: Array<any> ): any {
+export function chooseOption(feature: Feature, user_id: string) {
+    return option_to_show_user(
+        crc32_to_percentage(string_to_be_hashed(feature.name, user_id)),
+        getOptions(feature)
+    );
+};
 
+export function option_to_show_user( percentage: number, options: Array<any> ): any {
     return options[ Math.floor( percentage / ( 100 / options.length ) ) ];
 
 }

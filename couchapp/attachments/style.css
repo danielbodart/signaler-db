@@ -24,11 +24,20 @@ body {
 
 th {
     font-weight: 500;
-    padding: 10px;
 }
 
 td {
     text-align: center;
+}
+
+td > a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+}
+
+tr:hover {
+    text-decoration: underline;
 }
 
 td.name{
@@ -68,6 +77,11 @@ caption {
     padding: 7px;
     font-size: 2.5rem;
     font-weight: 500;
+}
+
+caption > .button {
+    font-size: 1rem;
+    float: right;
 }
 
 table {
