@@ -13,7 +13,7 @@ export interface Feature extends CouchDoc {
     percentage?: number,
     user_groups: string[],
     history?: History[],
-    options?: Array<any>
+    values?: Array<any>
 }
 
 export interface History {

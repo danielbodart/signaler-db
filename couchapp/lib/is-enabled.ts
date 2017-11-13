@@ -12,31 +12,31 @@ export function isEnabled(feature: Feature, user_group: string) {
     return false;
 }
 
-function getOptions( feature: Feature ): Array<any> {
-    if ( feature.options ) {
-        return feature.options;
+function getValues(feature: Feature ): Array<any> {
+    if ( feature.values ) {
+        return feature.values;
     }
 
     if ( feature.percentage ) {
-        return convertPercentagePropertyToOptions(feature.percentage);
+        return convertPercentagePropertyToValues(feature.percentage);
     }
 
     return [ true ];
 }
 
-export function chooseOption(feature: Feature, user_id: string) {
-    return option_to_show_user(
+export function chooseValue(feature: Feature, user_id: string) {
+    return value_to_show_user(
         crc32_to_percentage(string_to_be_hashed(feature.name, user_id)),
-        getOptions(feature)
+        getValues(feature)
     );
 };
 
-export function option_to_show_user( percentage: number, options: Array<any> ): any {
-    return options[ Math.floor( percentage / ( 100 / options.length ) ) ];
+export function value_to_show_user(percentage: number, values: Array<any> ): any {
+    return values[ Math.floor( percentage / ( 100 / values.length ) ) ];
 
 }
 
-export function convertPercentagePropertyToOptions(percentage: number ) {
+export function convertPercentagePropertyToValues(percentage: number ) {
     if ( percentage === 0 ) {
         return [ false ];
     }

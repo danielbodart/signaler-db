@@ -22,6 +22,23 @@ body {
     margin: 14px;
 }
 
+table {
+    border-collapse: collapse;
+}
+
+tr  {
+    border: 1px solid #f1f2eb;
+    background-color: #fff;
+}
+
+tr.feature.on {
+    background-color: #dbffd7;
+}
+
+tr.feature.on:hover {
+    background-color: #A5DDAD;
+}
+
 th {
     font-weight: 500;
 }
@@ -48,7 +65,7 @@ td.name, td.description {
     text-align: left;
 }
 
-th, tr:nth-child(even) {
+th {
     background: #f9faf8;
 }
 

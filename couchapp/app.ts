@@ -40,6 +40,13 @@ let design_doc: DesignDoc = {
                 feature._id = req.form.name;
                 feature.name = req.form.name;
             }
+
+            // migrate old property name
+            if(feature['options']){
+                feature.values = feature['options'];
+                delete feature['options'];
+            }
+
             let redirect: Response = {
                 code: 303,
                 headers: {"Location": "../../_list/toggle/all#" + feature._id},
@@ -50,7 +57,7 @@ let design_doc: DesignDoc = {
                 changes.push(change(feature, "active", req.form.active === 'true'));
                 changes.push(change(feature, "user_groups", toArray(req.form.user_groups)));
                 changes.push(change(feature, "description", req.form.description));
-                changes.push(change(feature, "options", JSON.parse(req.form.options)));
+                changes.push(change(feature, "values", JSON.parse(req.form.values)));
                 changes = changes.filter(c => !equal(c.old_value, c.new_value));
 
                 let history = feature.history || [];
@@ -73,7 +80,7 @@ let design_doc: DesignDoc = {
     lists: {
         toggle(head, req: Request) {
             provides('html', function () {
-                const convertPercentagePropertyToOptions = require("is-enabled").convertPercentagePropertyToOptions;
+                const convertPercentagePropertyToValues = require("is-enabled").convertPercentagePropertyToValues;
                 start({
                     "headers": {
                         "Cache-Control": "public, max-age=60",
@@ -93,32 +100,37 @@ let design_doc: DesignDoc = {
     <thead>
     <tr>
         <th class="active">Active</th>
-        <th class="user_groups">User Groups</th>
-        <th class="options">Options</th>
         <th class="name">Name</th>
+        <th class="values">Values</th>
+        <th class="Percentage">Percentage</th>
         <th class="description">Description</th>
+        <th class="user_groups">User Groups</th>
     </tr>
     </thead>
     <tbody>`);
                 for (let row = getRow(); row != null; row = getRow()) {
                     let feature: Feature = row.value;
+                    let values = feature.values ? feature.values : convertPercentagePropertyToValues(feature.percentage);
+                    let percentage = 100/values.length;
 
-
-                    send(`<tr id="${feature._id}">
+                    send(`<tr id="${feature._id}" class="feature ${feature.active ? "on" : "off" }">
         <td class="active">
             <a href="../../_show/edit/${feature._id}">${ feature.active ? "On" : "Off" }</a>
-        </td>
-        <td class="user_groups">
-            <a href="../../_show/edit/${feature._id}">${feature.user_groups.join("<br>")}</a>
-        </td>
-        <td class="options">
-            <a href="../../_show/edit/${feature._id}">${JSON.stringify(feature.options ? feature.options : convertPercentagePropertyToOptions(feature.percentage))}</a>
         </td>
         <td class="name">
             <a href="../../_show/edit/${feature._id}">${feature.name}</a>
         </td>
+        <td class="values">
+            <a href="../../_show/edit/${feature._id}">${JSON.stringify(values)}</a>
+        </td>
+        <td class="percentage">
+            <a href="../../_show/edit/${feature._id}">${percentage == 100 ? "" : percentage + "%" }</a>
+        </td>
         <td class="description">
             <a href="../../_show/edit/${feature._id}">${feature.description}</a>
+        </td>
+        <td class="user_groups">
+            <a href="../../_show/edit/${feature._id}">${feature.user_groups.join("<br>")}</a>
         </td>
     </tr>`);
                 }
@@ -139,13 +151,13 @@ let design_doc: DesignDoc = {
                 send('{"response":{');
                 let delimiter = false;
                 const isEnabled = require("is-enabled").isEnabled;
-                const chooseOption = require("is-enabled").chooseOption;
+                const chooseValue = require("is-enabled").chooseValue;
 
                 for (let row = getRow(); row != null; row = getRow()) {
                     let feature = row.value as Feature;
                     if(isEnabled(feature, req.query.user_group)) {
                         if (delimiter) send(',');
-                        send("\"" + row.key + "\"" + ':' + JSON.stringify(chooseOption(feature, req.query.user_id)));
+                        send("\"" + row.key + "\"" + ':' + JSON.stringify(chooseValue(feature, req.query.user_id)));
                         delimiter = true;
                     }
                 }
@@ -162,7 +174,7 @@ let design_doc: DesignDoc = {
                 feature.description = "";
                 feature.user_groups = [];
             }
-            const convertPercentagePropertyToOptions = require("is-enabled").convertPercentagePropertyToOptions;
+            const convertPercentagePropertyToValues = require("is-enabled").convertPercentagePropertyToValues;
 
             function toList(values: any[]): string {
                 return values.join("\n");
@@ -187,6 +199,12 @@ let design_doc: DesignDoc = {
         </td>
     </tr>
     <tr>
+        <th class="values">Values</th>
+        <td class="values">
+            <textarea name="values">${JSON.stringify(feature.values ? feature.values : convertPercentagePropertyToValues(feature.percentage))}</textarea>
+        </td>
+    </tr>
+    <tr>
         <th class="description">Description</th>
         <td class="description">
             <textarea name="description">${feature.description}</textarea>
@@ -203,12 +221,6 @@ let design_doc: DesignDoc = {
         <th class="user_groups">User Groups</th>
         <td class="user_groups">
             <textarea name="user_groups">${toList(feature.user_groups)}</textarea>
-        </td>
-    </tr>
-    <tr>
-        <th class="options">Options</th>
-        <td class="options">
-            <textarea name="options">${JSON.stringify(feature.options ? feature.options : convertPercentagePropertyToOptions(feature.percentage))}</textarea>
         </td>
     </tr>
     <tr>
