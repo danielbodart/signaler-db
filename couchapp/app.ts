@@ -57,7 +57,7 @@ let design_doc: DesignDoc = {
                 changes.push(change(feature, "active", req.form.active === 'true'));
                 changes.push(change(feature, "user_groups", toArray(req.form.user_groups)));
                 changes.push(change(feature, "description", req.form.description));
-                changes.push(change(feature, "values", JSON.parse(req.form.values)));
+                changes.push(change(feature, "values", req.form.values == "" ? null : JSON.parse(req.form.values)));
                 changes = changes.filter(c => !equal(c.old_value, c.new_value));
 
                 let history = feature.history || [];
@@ -80,7 +80,7 @@ let design_doc: DesignDoc = {
     lists: {
         toggle(head, req: Request) {
             provides('html', function () {
-                const convertPercentagePropertyToValues = require("is-enabled").convertPercentagePropertyToValues;
+                const getValues = require("is-enabled").getValues;
                 start({
                     "headers": {
                         "Cache-Control": "public, max-age=60",
@@ -110,8 +110,8 @@ let design_doc: DesignDoc = {
     <tbody>`);
                 for (let row = getRow(); row != null; row = getRow()) {
                     let feature: Feature = row.value;
-                    let values = feature.values ? feature.values : convertPercentagePropertyToValues(feature.percentage);
-                    let percentage = 100/values.length;
+                    let values = getValues(feature);
+                    let percentage = values.constructor === Array ? 100/values.length : 100;
 
                     send(`<tr id="${feature._id}" class="feature ${feature.active ? "on" : "off" }">
         <td class="active">
@@ -140,7 +140,7 @@ let design_doc: DesignDoc = {
 </html>`);
             });
         },
-        features(head, req) {
+        features(head, req: Request) {
             provides('json', function () {
                 start({
                     "headers": {
@@ -174,7 +174,7 @@ let design_doc: DesignDoc = {
                 feature.description = "";
                 feature.user_groups = [];
             }
-            const convertPercentagePropertyToValues = require("is-enabled").convertPercentagePropertyToValues;
+            const percentageToValues = require("is-enabled").percentageToValues;
 
             function toList(values: any[]): string {
                 return values.join("\n");
@@ -201,7 +201,7 @@ let design_doc: DesignDoc = {
     <tr>
         <th class="values">Values</th>
         <td class="values">
-            <textarea name="values">${JSON.stringify(feature.values ? feature.values : convertPercentagePropertyToValues(feature.percentage))}</textarea>
+            <textarea name="values">${JSON.stringify(feature.values ? feature.values : percentageToValues(feature.percentage))}</textarea>
         </td>
     </tr>
     <tr>

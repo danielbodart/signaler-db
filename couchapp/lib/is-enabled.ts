@@ -1,7 +1,5 @@
 import {Feature} from "./signaler-db";
 
-const crcTable = makeCRCTable();
-
 export function isEnabled(feature: Feature, user_group: string) {
     if (feature.active) {
         if (feature.user_groups.length > 0) {
@@ -12,41 +10,44 @@ export function isEnabled(feature: Feature, user_group: string) {
     return false;
 }
 
-function getValues(feature: Feature ): Array<any> {
-    if ( feature.values ) {
+export function getValues(feature: Feature): any {
+    if (feature.values) {
         return feature.values;
     }
 
-    if ( feature.percentage ) {
-        return convertPercentagePropertyToValues(feature.percentage);
+    if (feature.percentage) {
+        return percentageToValues(feature.percentage);
     }
 
-    return [ true ];
+    return true;
 }
 
-export function chooseValue(feature: Feature, user_id: string) {
+export function chooseValue(feature: Feature, user_id: string):any {
     return value_to_show_user(
         crc32_to_percentage(string_to_be_hashed(feature.name, user_id)),
         getValues(feature)
     );
-};
+}
 
-export function value_to_show_user(percentage: number, values: Array<any> ): any {
-    return values[ Math.floor( percentage / ( 100 / values.length ) ) ];
+export function value_to_show_user(percentage: number, values: any): any {
+    if(values.constructor != Array) return values;
+    return values[Math.floor(percentage / ( 100 / values.length ))];
 
 }
 
-export function convertPercentagePropertyToValues(percentage: number ) {
-    if ( percentage === 0 ) {
-        return [ false ];
+export function percentageToValues(percentage: number): boolean | Array<boolean> {
+    if (percentage === 0) {
+        return false;
     }
-    if ( percentage === 100 ) {
-        return [ true ];
+    if (percentage === 100 || percentage === null) {
+        return true;
     }
-    return [ true, false ];
+    return [true, false];
 }
 
-function makeCRCTable() {
+const crcTable = makeCRCTable();
+
+function makeCRCTable():number[] {
     let c;
     let crcTable = [];
     for (let n = 0; n < 256; n++) {
@@ -59,18 +60,18 @@ function makeCRCTable() {
     return crcTable;
 }
 
-function crc32(str) {
+function crc32(value:string):number {
     let crc = 0 ^ (-1);
 
-    for (let i = 0; i < str.length; i++) {
-        crc = (crc >>> 8) ^ crcTable[(crc ^ str.charCodeAt(i)) & 0xFF];
+    for (let i = 0; i < value.length; i++) {
+        crc = (crc >>> 8) ^ crcTable[(crc ^ value.charCodeAt(i)) & 0xFF];
     }
 
     return (crc ^ (-1)) >>> 0;
 }
 
-function string_to_be_hashed(part1: string, part2: string): string {
-    return `${part1}-1_000_000-${part2}`;
+function string_to_be_hashed(feature: string, user_id: string): string {
+    return `${feature}-1_000_000-${user_id}`;
 }
 
 export function crc32_to_percentage(string_to_hash: string): number {

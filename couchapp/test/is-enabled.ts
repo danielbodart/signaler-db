@@ -2,7 +2,7 @@ import {expect} from "chai";
 import {describe, it} from "mocha";
 import {
     isEnabled,
-    convertPercentagePropertyToValues,
+    percentageToValues,
     value_to_show_user,
     crc32_to_percentage,
     chooseValue
@@ -93,70 +93,33 @@ describe("chooseValue function", function () {
 });
 
 
-describe("Old property 'percentage' should be converted to new property 'options'", function () {
-
-    it("should convert a 0 percentage value to a single FALSE boolean option", function () {
-
-        expect(convertPercentagePropertyToValues(0)).to.deep.equal([false]);
-
+describe("percentageToValues function", function () {
+    it("converts 0% to false", function () {
+        expect(percentageToValues(0)).to.deep.equal(false);
     });
 
-    it("should convert a none 0 or 100 percentage value to TRUE and FALSE boolean options", function () {
-
-        expect(convertPercentagePropertyToValues(50)).to.deep.equal([true, false]);
-
+    it("converts 50% to an array containing true and false", function () {
+        expect(percentageToValues(50)).to.deep.equal([true, false]);
     });
 
-    it("should convert a 100 percentage value to a single TRUE boolean option", function () {
+    it("converts 100% to true", function () {
+        expect(percentageToValues(100)).to.deep.equal(true);
+    });
 
-        expect(convertPercentagePropertyToValues(100)).to.deep.equal([true]);
-
+    it("converts null to true", function () {
+        expect(percentageToValues(null)).to.deep.equal(true);
     });
 });
 
-describe("the ratio of each option available for the feature should have the same chance of being returned, determinable by the hashed user id", function () {
+describe("value_to_show_user function", function () {
 
-    it("should give each option a 50% chance of being picked when TWO options are available", function () {
-
-        const options = ["one", "two"];
-
-        expect(value_to_show_user(0, options)).to.equal("one");
-        expect(value_to_show_user(49, options)).to.equal("one");
-        expect(value_to_show_user(50, options)).to.equal("two");
-        expect(value_to_show_user(99, options)).to.equal("two");
-
+    it("will return value if not an array", function () {
+        expect(value_to_show_user(0, true)).to.equal(true);
+        expect(value_to_show_user(19, false)).to.equal(false);
     });
 
-    it("should give each option a 33.3% chance of being picked when THREE options are available", function () {
 
-        const options = ["one", "two", "three"];
-
-        expect(value_to_show_user(0, options)).to.equal("one");
-        expect(value_to_show_user(33, options)).to.equal("one");
-        expect(value_to_show_user(34, options)).to.equal("two");
-        expect(value_to_show_user(66, options)).to.equal("two");
-        expect(value_to_show_user(67, options)).to.equal("three");
-        expect(value_to_show_user(99, options)).to.equal("three");
-
-    });
-
-    it("should give each option a 25% chance of being picked when FOUR options are available", function () {
-
-        const options = ["one", "two", "three", "four"];
-
-        expect(value_to_show_user(0, options)).to.equal("one");
-        expect(value_to_show_user(24, options)).to.equal("one");
-        expect(value_to_show_user(25, options)).to.equal("two");
-        expect(value_to_show_user(49, options)).to.equal("two");
-        expect(value_to_show_user(50, options)).to.equal("three");
-        expect(value_to_show_user(74, options)).to.equal("three");
-        expect(value_to_show_user(75, options)).to.equal("four");
-        expect(value_to_show_user(99, options)).to.equal("four");
-
-    });
-
-    it("should give each option a 20% chance of being picked when FIVE options are available", function () {
-
+    it("supports arrays of values", function () {
         const options = ["one", "two", "three", "four", "five"];
 
         expect(value_to_show_user(0, options)).to.equal("one");
@@ -169,7 +132,6 @@ describe("the ratio of each option available for the feature should have the sam
         expect(value_to_show_user(79, options)).to.equal("four");
         expect(value_to_show_user(80, options)).to.equal("five");
         expect(value_to_show_user(99, options)).to.equal("five");
-
     });
 
 });
@@ -185,39 +147,4 @@ describe("super cautious tests based on actual values Tom pull from Signaler-db"
     });
 
 });
-
-// const variants1 = {
-//     "name": "variant1",
-//     "active": true,
-//     "user_groups": [],
-//     "variants": [ true, false ]
-// };
-//
-// const variants2 = {
-//     "name": "variant2",
-//     "active": true,
-//     "user_groups": [],
-//     "variants": [ "foo", "bar", "lar" ]
-// };
-//
-// const variants3 = {
-//     "name": "variant3",
-//     "active": true,
-//     "user_groups": [],
-//     "variants": [ { "name": "foo" }, { "name": "bar" } ]
-// };
-//
-// const variants4 = {
-//     "name": "variant4",
-//     "active": true,
-//     "user_groups": [],
-//     "variants": [ 10, 20, 30, 40, 50 ]
-// };
-//
-// const variants5 = {
-//     "name": "variant5",
-//     "active": true,
-//     "user_groups": [],
-//     "variants": [ true, "foo", { "name": "bar" }, 40 ]
-// };
 
