@@ -174,7 +174,7 @@ let design_doc: DesignDoc = {
                 feature.description = "";
                 feature.user_groups = [];
             }
-            const percentageToValues = require("is-enabled").percentageToValues;
+            const getValues = require("is-enabled").getValues;
 
             function toList(values: any[]): string {
                 return values.join("\n");
@@ -201,7 +201,7 @@ let design_doc: DesignDoc = {
     <tr>
         <th class="values">Values</th>
         <td class="values">
-            <textarea name="values">${JSON.stringify(feature.values ? feature.values : percentageToValues(feature.percentage))}</textarea>
+            <textarea name="values">${JSON.stringify(getValues(feature))}</textarea>
         </td>
     </tr>
     <tr>
