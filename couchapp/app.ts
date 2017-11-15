@@ -23,9 +23,8 @@ let design_doc: DesignDoc = {
             }
 
             function equal(a: any, b: any) {
-                if (a instanceof Array && b instanceof Array) {
-                    // stupid simple
-                    return a.length == b.length;
+                if (Array.isArray(a) && Array.isArray(b)) {
+                    return a.length == b.length && a.every((v, i) => v === b[i]);
                 }
                 return a === b;
             }

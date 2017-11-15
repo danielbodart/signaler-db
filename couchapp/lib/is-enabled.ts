@@ -30,9 +30,8 @@ export function chooseValue(feature: Feature, user_id: string):any {
 }
 
 export function value_to_show_user(percentage: number, values: any): any {
-    if(values.constructor != Array) return values;
+    if(!Array.isArray(values)) return values;
     return values[Math.floor(percentage / ( 100 / values.length ))];
-
 }
 
 export function percentageToValues(percentage: number): boolean | Array<boolean> {

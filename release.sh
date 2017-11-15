@@ -28,6 +28,7 @@ function update_db(){
 
     bin/npm install
     bin/tsc -p ${db}
+    bin/npm run test
     bin/couchapp push ${db}/app.js ${url}
 }
 
