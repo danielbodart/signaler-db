@@ -29,7 +29,7 @@ let design_doc: DesignDoc = {
                 return a === b;
             }
 
-            function toArray(value:string):any[]{
+            function toArray(value: string): any[] {
                 return value.split("\s+").filter(v => Boolean(v));
             }
 
@@ -41,7 +41,7 @@ let design_doc: DesignDoc = {
             }
 
             // migrate old property name
-            if(feature['options']){
+            if (feature['options']) {
                 feature.values = feature['options'];
                 delete feature['options'];
             }
@@ -60,17 +60,20 @@ let design_doc: DesignDoc = {
                 changes = changes.filter(c => !equal(c.old_value, c.new_value));
 
                 let history = feature.history || [];
-                history.push({
-                    user: req.userCtx.name,
-                    changes: changes,
-                    changed_at: new Date(),
-                });
-                feature.history = history;
+                if(changes.length > 0) {
+                    history.push({
+                        user: req.userCtx.name,
+                        changes: changes,
+                        changed_at: new Date(),
+                    });
+                }
+                feature.history = history;//.sort((a, b) => a.changed_at.getTime() - b.changed_at.getTime());
+
 
                 return [feature, redirect];
             }
             else if (action === 'Delete') {
-                feature._deleted = true;
+                if(feature) feature._deleted = true;
                 return [feature, redirect];
             }
             throw new Error(`Unknown action:${action}`)
@@ -94,7 +97,7 @@ let design_doc: DesignDoc = {
     <link rel="stylesheet" href="../../style.css"/>
 </head>
 <body>
-<table>
+<table sortable>
     <caption>Features <a class="button" href="../../_show/edit/">New</a></caption>
     <thead>
     <tr>
@@ -110,7 +113,7 @@ let design_doc: DesignDoc = {
                 for (let row = getRow(); row != null; row = getRow()) {
                     let feature: Feature = row.value;
                     let values = getValues(feature);
-                    let percentage = values.constructor === Array ? 100/values.length : 100;
+                    let percentage = values.constructor === Array ? 100 / values.length : 100;
 
                     send(`<tr id="${feature._id}" class="feature ${feature.active ? "on" : "off" }">
         <td class="active">
@@ -154,7 +157,7 @@ let design_doc: DesignDoc = {
 
                 for (let row = getRow(); row != null; row = getRow()) {
                     let feature = row.value as Feature;
-                    if(isEnabled(feature, req.query.user_group)) {
+                    if (isEnabled(feature, req.query.user_group)) {
                         if (delimiter) send(',');
                         send("\"" + row.key + "\"" + ':' + JSON.stringify(chooseValue(feature, req.query.user_id)));
                         delimiter = true;
@@ -196,7 +199,7 @@ let design_doc: DesignDoc = {
     Feature
     <span class="actions">
             <input class="button" type="submit" name="action" value="${feature.name == "" ? "Create" : "Update"}"/>
-            <input class="button danger"  type="submit" name="action" value="Delete"/>
+            <input class="button danger"  type="submit" name="action" value="Delete"  onsubmit="return confirm('Confirm Delete');"/>
     </span>
     </caption>
     <tbody>
@@ -227,6 +230,28 @@ let design_doc: DesignDoc = {
     </tbody>
 </table>
 </form>
+
+<table>
+<caption>History</caption>
+<thead>
+<tr><th rowspan="2">Changed At</th><th colspan="3">Changes</th><th rowspan="2">User</th></tr>
+<tr><th>Property</th><th>Old Value</th><th>New Value</th></tr>
+</thead>
+<tbody>
+${ feature.history ? feature.history.map(item => {
+    function c(change:Change) {
+        return `<td>${change.property}</td><td>${change.old_value}</td><td>${change.new_value}</td>`;
+    }
+    
+    return `<tr>
+<td rowspan="${item.changes.length}">${item.changed_at}</td>
+${c(item.changes[0])}
+<td rowspan="${item.changes.length}">${item.user ? item.user : "Anonymous" }</td>
+</tr>
+${item.changes.length > 1 ? item.changes.slice(1).map(change => {return ` <tr>${c(change)}</tr>`}).join("") : ""}
+`}).join("") : ""}
+</tbody>
+</table>
 
 </body>
 </html>`
