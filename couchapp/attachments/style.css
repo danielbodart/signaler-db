@@ -26,7 +26,7 @@ table {
     border-collapse: collapse;
 }
 
-tr  {
+tr {
     border: 1px solid #f1f2eb;
     background-color: #fff;
 }
@@ -57,7 +57,7 @@ tr:hover {
     text-decoration: underline;
 }
 
-td.name{
+td.name {
     white-space: nowrap;
 }
 
@@ -74,8 +74,12 @@ th {
 }
 
 @keyframes target-fade {
-    0% { background-color: #880000; }
-    100% { background-color: inherit; }
+    0% {
+        background-color: #880000;
+    }
+    100% {
+        background-color: inherit;
+    }
 }
 
 tr:hover {
@@ -96,9 +100,14 @@ caption {
     font-weight: 500;
 }
 
-caption > .button {
+caption .button {
     font-size: 1rem;
     float: right;
+}
+
+caption .active {
+    font-size: 1rem;
+    float: left;
 }
 
 table {
@@ -110,6 +119,89 @@ form {
     margin: 0;
     padding: 0;
 }
+
+.active input {
+    display: none;
+}
+
+.active label {
+    display: inline-block;
+    padding: 10px 15px;
+    font-weight: normal;
+    line-height: 1.5;
+    border-radius: 25px;
+    transition: background-color 0.2s, border 0.2s, color 0.2s;
+    user-select: none;
+}
+
+.active label[for=on] {
+    border-right: none;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    padding-right: 5px;
+}
+
+.active label[for=off] {
+    border-left: none;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    padding-left: 5px;
+}
+
+.active #on:checked ~ label {
+    border: #2274a5 2px solid;
+    background-color: #2274a5;
+    color: #fff
+}
+
+.active #on:checked ~ label[for=off] {
+    color: #2274a5;
+}
+
+.active #off:checked ~ label {
+    border: #f1f2eb 2px solid;
+    background-color: #f1f2eb;
+    color: #3e4e50;
+}
+
+.active #off:checked ~ label[for=on] {
+    color: #f1f2eb;
+}
+
+.active {
+    position: relative;
+}
+
+.active label::after {
+    cursor: pointer;
+    position: absolute;
+    display: block;
+    width: 2.2rem;
+    height: 2.2rem;
+    background-color: #fff;
+    border-radius: 1.5rem;
+    top: 50%;
+    margin-top: -1.1rem;
+    content: "";
+    transition: right 0.2s;
+}
+
+.active #on:checked ~ label::after{
+    right: 7px;
+}
+
+.active #off:checked ~ label::after{
+    right: calc(50%);
+}
+
+.active #on:checked ~ label[for=on]::after{
+    visibility: hidden;
+}
+
+.active #off:checked ~ label[for=off]::after{
+    visibility: hidden;
+}
+
 
 .button {
     display: inline-block;
@@ -128,16 +220,26 @@ form {
     font-size: 1em
 }
 
-.button:focus,.button:hover,.button:active {
+.button:focus, .button:hover, .button:active {
     cursor: pointer;
     background-color: #2274a5;
     color: #fff
 }
 
-.button:link,.button:visited {
+.button:link, .button:visited {
     text-decoration: none
 }
 
+.button.danger {
+    border: #a50400 2px solid;
+    background-color: #fff;
+    color: #c70500;
+}
+
+.button.danger:focus, .button.danger:hover, .button.danger:active {
+    background-color: #a50400;
+    color: #fff;
+}
 
 input[type=text], input[type=email], input[type=number], textarea {
     border: 1px solid #eee;

@@ -187,10 +187,19 @@ let design_doc: DesignDoc = {
     <link rel="stylesheet" href="../../style.css"/>
 </head>
 <body>
+<form action="../../_update/toggle/${feature._id}" method="post">
 <table>
-    <caption>Feature</caption>
+    <caption>
+    <span class="active">
+            <input type="radio" name="active" id="on" value="true" ${ feature.active ? "checked" : "" }/><input type="radio" name="active" id="off" value="false" ${ feature.active ? "" : "checked" }/><label for="on">On</label><label for="off">Off</label>
+    </span>
+    Feature
+    <span class="actions">
+            <input class="button" type="submit" name="action" value="${feature.name == "" ? "Create" : "Update"}"/>
+            <input class="button danger"  type="submit" name="action" value="Delete"/>
+    </span>
+    </caption>
     <tbody>
-    <form action="../../_update/toggle/${feature._id}" method="post">
     <tr>
         <th class="name">Name</th>
         <td class="name">
@@ -210,28 +219,15 @@ let design_doc: DesignDoc = {
         </td>
     </tr>
     <tr>
-        <th class="active">Active</th>
-                <td class="active">
-            <label>On <input type="radio" name="active" value="true" ${ feature.active ? "checked" : "" }/> </label>
-            <label><input type="radio" name="active" value="false" ${ feature.active ? "" : "checked" }/> Off </label>
-        </td>
-    </tr>
-    <tr>
         <th class="user_groups">User Groups</th>
         <td class="user_groups">
             <textarea name="user_groups">${toList(feature.user_groups)}</textarea>
         </td>
     </tr>
-    <tr>
-        <th class="actions">Actions</th>
-        <td class="actions">
-            <input class="button" type="submit" name="action" value="${feature.name == "" ? "Create" : "Update"}"/>
-            <input class="button"  type="submit" name="action" value="Delete"/>
-        </td>
-    </tr>
-    </form>
     </tbody>
 </table>
+</form>
+
 </body>
 </html>`
         }
