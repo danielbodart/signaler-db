@@ -117,7 +117,7 @@ let design_doc: DesignDoc = {
                 for (let row = getRow(); row != null; row = getRow()) {
                     let feature: Feature = row.value;
                     let values = getValues(feature);
-                    let percentage = values.constructor === Array ? 100 / values.length : 100;
+                    let percentage = Array.isArray(values) ? 100 / values.length : 100;
 
                     send(`<tr id="${feature._id}" class="feature ${feature.active ? "on" : "off" }">
         <td class="active">
