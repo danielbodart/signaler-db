@@ -60,20 +60,22 @@ let design_doc: DesignDoc = {
                 changes = changes.filter(c => !equal(c.old_value, c.new_value));
 
                 let history = feature.history || [];
-                if(changes.length > 0) {
-                    history.push({
-                        user: req.userCtx.name,
-                        changes: changes,
-                        changed_at: new Date(),
-                    });
-                }
-                feature.history = history;//.sort((a, b) => a.changed_at.getTime() - b.changed_at.getTime());
+                history.unshift({
+                    user: req.userCtx.name,
+                    changes: changes,
+                    changed_at: new Date(),
+                });
+                // Cleanup old history items
+                feature.history = history.map(h => {
+                    h.changes = h.changes.filter(c => !equal(c.old_value, c.new_value));
+                    return h;
+                }).filter(h => h.changes.length > 0).sort( (a, b) => new Date(b.changed_at).getTime() - new Date(a.changed_at).getTime());
 
 
                 return [feature, redirect];
             }
             else if (action === 'Delete') {
-                if(feature) feature._deleted = true;
+                if (feature) feature._deleted = true;
                 return [feature, redirect];
             }
             throw new Error(`Unknown action:${action}`)
@@ -239,17 +241,20 @@ let design_doc: DesignDoc = {
 </thead>
 <tbody>
 ${ feature.history ? feature.history.map(item => {
-    function c(change:Change) {
-        return `<td>${change.property}</td><td>${change.old_value}</td><td>${change.new_value}</td>`;
-    }
-    
-    return `<tr>
+                function c(change: Change) {
+                    return `<td>${change.property}</td><td>${change.old_value ? change.old_value : ""}</td><td>${change.new_value}</td>`;
+                }
+
+                return `<tr>
 <td rowspan="${item.changes.length}">${item.changed_at}</td>
 ${c(item.changes[0])}
 <td rowspan="${item.changes.length}">${item.user ? item.user : "Anonymous" }</td>
 </tr>
-${item.changes.length > 1 ? item.changes.slice(1).map(change => {return ` <tr>${c(change)}</tr>`}).join("") : ""}
-`}).join("") : ""}
+${item.changes.length > 1 ? item.changes.slice(1).map(change => {
+                    return ` <tr>${c(change)}</tr>`
+                }).join("") : ""}
+`
+            }).join("") : ""}
 </tbody>
 </table>
 
