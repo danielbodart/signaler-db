@@ -60,11 +60,13 @@ let design_doc: DesignDoc = {
                 changes = changes.filter(c => !equal(c.old_value, c.new_value));
 
                 let history = feature.history || [];
-                history.unshift({
-                    user: req.userCtx.name,
-                    changes: changes,
-                    changed_at: new Date(),
-                });
+                if(changes.length > 0) {
+                    history.unshift({
+                        user: req.userCtx.name,
+                        changes: changes,
+                        changed_at: new Date(),
+                    });
+                }
                 // Cleanup old history items
                 feature.history = history.map(h => {
                     h.changes = h.changes.filter(c => !equal(c.old_value, c.new_value));
