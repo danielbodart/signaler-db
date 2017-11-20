@@ -201,7 +201,7 @@ let design_doc: DesignDoc = {
     Feature
     <span class="actions">
             <input class="button" type="submit" name="action" value="${feature.name == "" ? "Create" : "Update"}"/>
-            <input class="button danger"  type="submit" name="action" value="Delete"  onsubmit="return confirm('Confirm Delete');"/>
+            <input class="button danger"  type="submit" name="action" value="Delete"  onclick="return confirm('Delete');"/>
     </span>
     </caption>
     <tbody>
