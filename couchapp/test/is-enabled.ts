@@ -5,7 +5,7 @@ import {
     percentageToValues,
     value_to_show_user,
     crc32_to_percentage,
-    chooseValue
+    chooseValue, getValues
 } from "../lib/is-enabled";
 import {Feature} from "../lib/signaler-db";
 
@@ -92,6 +92,20 @@ describe("chooseValue function", function () {
 
 });
 
+describe("getValue function", function () {
+    it("returns feature.values when defined", function () {
+        expect(getValues({"values": true} as Feature)).to.equal(true);
+        expect(getValues({"values": false} as Feature)).to.equal(false);
+    });
+
+    it("returns feature.percentage if only that defined", function () {
+        expect(getValues({"percentage": 50} as Feature)).to.deep.equal([true,false]);
+    });
+
+    it("returns true if nothing defined", function () {
+        expect(getValues({} as Feature)).to.equal(true);
+    });
+});
 
 describe("percentageToValues function", function () {
     it("converts 0% to false", function () {

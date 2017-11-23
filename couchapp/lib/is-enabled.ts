@@ -11,11 +11,11 @@ export function isEnabled(feature: Feature, user_group: string) {
 }
 
 export function getValues(feature: Feature): any {
-    if (feature.values) {
+    if (typeof feature.values != "undefined") {
         return feature.values;
     }
 
-    if (feature.percentage) {
+    if (typeof feature.percentage != "undefined") {
         return percentageToValues(feature.percentage);
     }
 
