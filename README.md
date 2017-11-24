@@ -8,11 +8,13 @@ Features:
   * Much simplier
   * Minimal dependencies (A CouchDB instance somewhere)
   * Audit history of who made what change and when
-  * Support other values for toggles (Not just boolean, but any valid JSON value)
-  * Support multivariant toggles (A/B/C)
+  * Supports any legal JSON value
+  * Supports A/B tests (and multivariant A/B/C/etc)
+  * Stable traffic splitting by user_id
 
 Coming soon:
   * Basic User login (using CouchDB features)
+  * Simple custom logic for value determination via JS function rule
  
 ## Developing SignalerDB
 
