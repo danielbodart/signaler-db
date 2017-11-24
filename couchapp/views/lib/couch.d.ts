@@ -35,8 +35,12 @@ export interface View {
     reduce?: string | ((keys: any[] | null, values: any[], rereduce: boolean) => any[]);
 }
 
+export interface Library {
+    [name: string]: string;
+}
+
 export interface Views {
-    [name: string]: View;
+    [name: string]: View | Library;
 }
 
 export interface Head {
@@ -61,8 +65,8 @@ export interface DesignDoc extends CouchDoc {
     lists?: Lists,
     shows?: Shows,
     updates?: Updates,
-    lib?: {},
-    vendor?: {},
+    lib?: Library,
+    vendor?: Library,
     validate_doc_update?: (newDoc: CouchDoc, oldDoc: CouchDoc, userCtx?: UserContextObject, secObj?: SecurityObject) => void,
 }
 

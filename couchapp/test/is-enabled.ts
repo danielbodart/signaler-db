@@ -6,8 +6,8 @@ import {
     value_to_show_user,
     crc32_to_percentage,
     chooseValue, getValues
-} from "../lib/is-enabled";
-import {Feature} from "../lib/signaler-db";
+} from "../views/lib/is-enabled";
+import {Feature} from "../views/lib/signaler-db";
 
 describe("isEnabled function determines if a feature is enabled", function () {
 

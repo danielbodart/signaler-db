@@ -1,6 +1,6 @@
 {
   "files": [
     "app.ts",
-    "lib/is-enabled.ts"
+    "views/lib/is-enabled.ts"
   ]
 }

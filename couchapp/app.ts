@@ -1,15 +1,17 @@
 import {loadAttachments} from "couchapp";
-import {DesignDoc, CouchDoc, UserContextObject, SecurityObject, Request, Response} from "./lib/couch";
+import {DesignDoc, CouchDoc, UserContextObject, SecurityObject, Request, Response} from "./views/lib/couch";
 import {join} from "path";
-import {Change, Feature, History} from "./lib/signaler-db";
+import {Change, Feature, History} from "./views/lib/signaler-db";
 
 declare const __dirname: string;
+declare function require(moduleName: string): any;
 
 let design_doc: DesignDoc = {
     _id: '_design/' + process.env['SIGNALER_VERSION'],
     views: {
         all: {
             map(feature: Feature) {
+                const getValues = require("views/lib/is-enabled").getValues;
                 emit(feature.name, feature);
             }
         }
@@ -86,7 +88,7 @@ let design_doc: DesignDoc = {
     lists: {
         toggle(head, req: Request) {
             provides('html', function () {
-                const getValues = require("is-enabled").getValues;
+                const getValues = require("views/lib/is-enabled").getValues;
                 start({
                     "headers": {
                         "Cache-Control": "public, max-age=60",
@@ -156,8 +158,8 @@ let design_doc: DesignDoc = {
                 });
                 send('{"response":{');
                 let delimiter = false;
-                const isEnabled = require("is-enabled").isEnabled;
-                const chooseValue = require("is-enabled").chooseValue;
+                const isEnabled = require("views/lib/is-enabled").isEnabled;
+                const chooseValue = require("views/lib/is-enabled").chooseValue;
 
                 for (let row = getRow(); row != null; row = getRow()) {
                     let feature = row.value as Feature;
@@ -180,7 +182,7 @@ let design_doc: DesignDoc = {
                 feature.description = "";
                 feature.user_groups = [];
             }
-            const getValues = require("is-enabled").getValues;
+            const getValues = require("views/lib/is-enabled").getValues;
 
             function toList(values: any[]): string {
                 return values.join("\n");
@@ -280,6 +282,8 @@ function moduleToString(modulePathRelative: string): string {
 
 loadAttachments(design_doc, join(__dirname, 'attachments'));
 
-design_doc["is-enabled"] = moduleToString("./lib/is-enabled");
+design_doc["views"]["lib"] = {
+    "is-enabled": moduleToString("./views/lib/is-enabled")
+};
 
 export = design_doc;
