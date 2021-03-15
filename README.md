@@ -5,7 +5,7 @@ Features:
   * Application feature toggles are issolated (single CouchDB per application)
   * Auto Versioned API with zero down time (a design document per version)
   * Much faster performance (lower latency, high throughput)
-  * Much simplier
+  * Much simpler
   * Minimal dependencies (A CouchDB instance somewhere)
   * Audit history of who made what change and when
   * Supports any legal JSON value
